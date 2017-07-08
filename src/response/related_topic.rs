@@ -6,7 +6,7 @@ use serde::de;
 /// Internal link(s) to related topics associated with abstract. A result could
 /// either be a single `TopicResult`, or a `Topic` containing multiple
 /// `TopicResult`s in a certain area of interest.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum RelatedTopic {
     /// The link had a single topic.
     TopicResult(TopicResult),
@@ -93,7 +93,7 @@ impl<'de> de::Visitor<'de> for Visitor {
 }
 
 /// An link associated with abstract.
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq)]
 pub struct TopicResult {
     /// First URL for the Result.
     #[serde(rename="FirstURL")]
@@ -111,7 +111,7 @@ pub struct TopicResult {
 
 
 /// Name, and Vec of `TopicResult`s.
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq)]
 pub struct Topic {
     /// vec of external links associated with abstract.
     #[serde(rename="Topics")]

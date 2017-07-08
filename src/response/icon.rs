@@ -4,7 +4,7 @@ use serde::{de, Deserializer};
 
 /// An icon associated with a URL. Icon's can be bigger than the dimensions
 /// specified in the struct.
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq)]
 pub struct Icon {
     /// The **suggested** height of the icon.
     #[serde(rename="Height", deserialize_with="deserialize_u64_or_empty_string")]

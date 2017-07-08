@@ -1,7 +1,7 @@
 use super::*;
 
 /// The Response from DuckDuckGo.
-#[derive(Clone, Debug, Default, Deserialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Eq)]
 pub struct Response {
     /// The Topic summary (can contain HTML, e.g. italics).
     #[serde(rename="Abstract")]

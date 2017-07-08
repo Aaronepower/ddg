@@ -1,7 +1,7 @@
 use self::Type::*;
 
 /// The Different types of Instant Answers.
-#[derive(Clone, Copy, Debug, Deserialize)]
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Eq)]
 pub enum Type {
     /// An Article about the answer.
     #[serde(rename="A")]
