@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 use std::{fmt, error};
 
-use reqwest::{self, IntoUrl, Url, UrlError, Error as HttpError};
+use reqwest::{self, Url, UrlError, Error as HttpError};
 
 use serde_json;
 
@@ -56,56 +56,9 @@ impl<'a> Query<'a> {
 
     /// Execute the request and parses it into a `DdgResponse` struct.
     pub fn execute(self) -> Result<Response, Error> {
-        Ok(serde_json::from_reader(reqwest::get(self)?)?)
+        Ok(reqwest::get(self.into_url()?)?.json()?)
     }
-}
 
-/// Error from parsing or convertingi into a URL.
-#[derive(Debug)]
-pub enum Error {
-    /// An error in making the HTTP request, or parsing the query string into a
-    /// url.
-    Http(HttpError),
-    /// An error in parsing the JSON.
-    Serde(serde_json::Error),
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        use std::error::Error;
-        use self::Error::*;
-
-        match *self {
-            Http(ref err) => write!(f, "Http: {}", err.description()),
-            Serde(ref err) => write!(f, "Serde: {}", err.description()),
-        }
-    }
-}
-
-impl error::Error for Error {
-    fn description(&self) -> &str {
-        use self::Error::*;
-
-        match *self {
-            Http(ref err) => err.description(),
-            Serde(ref err) => err.description(),
-        }
-    }
-}
-
-impl From<HttpError> for Error {
-    fn from(error: HttpError) -> Self {
-        Error::Http(error)
-    }
-}
-
-impl From<serde_json::Error> for Error {
-    fn from(error: serde_json::Error) -> Self {
-        Error::Serde(error)
-    }
-}
-
-impl<'a> IntoUrl for Query<'a> {
     fn into_url(self) -> Result<Url, UrlError> {
         const URL: &'static str = "https://api.duckduckgo.com?format=json&no_redirect=1";
         let mut query = String::from(URL);
@@ -122,6 +75,61 @@ impl<'a> IntoUrl for Query<'a> {
             ("q", &*self.query),
             ("t", &*self.name)
         ])
+    }
+}
+
+/// Error from parsing or converting into a URL.
+#[derive(Debug)]
+pub enum Error {
+    /// An error in making the HTTP request, or parsing the query string into a
+    /// url.
+    Http(HttpError),
+    /// An error in parsing the JSON.
+    Serde(serde_json::Error),
+    /// An error in parsing the URL.
+    Url(UrlError),
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use std::error::Error;
+        use self::Error::*;
+
+        match *self {
+            Http(ref err) => write!(f, "Http: {}", err.description()),
+            Serde(ref err) => write!(f, "Serde: {}", err.description()),
+            Url(ref err) => write!(f, "Url: {}", err.description()),
+        }
+    }
+}
+
+impl error::Error for Error {
+    fn description(&self) -> &str {
+        use self::Error::*;
+
+        match *self {
+            Http(ref err) => err.description(),
+            Serde(ref err) => err.description(),
+            Url(ref err) => err.description(),
+        }
+    }
+}
+
+impl From<HttpError> for Error {
+    fn from(error: HttpError) -> Self {
+        Error::Http(error)
+    }
+}
+
+impl From<UrlError> for Error {
+    fn from(error: UrlError) -> Self {
+        Error::Url(error)
+    }
+}
+
+impl From<serde_json::Error> for Error {
+    fn from(error: serde_json::Error) -> Self {
+        Error::Serde(error)
     }
 }
 
