@@ -56,7 +56,7 @@ impl<'a> Query<'a> {
 
     /// Execute the request and parses it into a `DdgResponse` struct.
     pub fn execute(self) -> Result<Response, Error> {
-        Ok(reqwest::get(self.into_url()?)?.json()?)
+        Ok(reqwest::get(self.into_url()?)?.error_for_status()?.json()?)
     }
 
     fn into_url(self) -> Result<Url, UrlError> {
@@ -133,7 +133,7 @@ impl From<serde_json::Error> for Error {
     }
 }
 
-#[cfg(all(test, feature = "reqwest"))]
+#[cfg(test)]
 mod tests {
     use super::Query;
 
